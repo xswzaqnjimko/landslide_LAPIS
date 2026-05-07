@@ -1,0 +1,680 @@
+{
+  "_description": "LAPIS scenario parameter file for Cascade Mountains 2009 event. 12 scenarios: 3 climate classes \u00d7 2 moisture sub-classes \u00d7 2 soil availability levels. Dryer/wetter sub-classes have SPLIT parameter ranges (each gets half of the climate class range) to prevent cross-contamination. Plus 4 general site model scenarios.",
+  "_usage": "python data_generation_scenarios.py --scenario_file scenarios_2009_split.json",
+  "_notes": {
+    "climate_classes": "dry / moderate / wet \u2014 controls ranges of S_c, q_c, k",
+    "moisture_subclass": "dryer = upper half of S_c & q_c, lower half of k; wetter = lower half of S_c & q_c, upper half of k. Split at midpoint of each climate class range.",
+    "soil_levels": "soil1 = lower half of soil range; soil2 = upper half of soil range",
+    "param_ranges_source": "Model_outputs_2.pptx from collaborator (Feb 2026), with dryer/wetter split at midpoint to prevent ensemble members from sampling extreme-opposite parameters",
+    "n_ensemble": 15,
+    "deep_seated": true,
+    "theta_true_source": "Collaborator's PPTX example values for each dryer/wetter endpoint (verified within sub-ranges)",
+    "general_model": "S_c=0.1-0.15, q_c=0.05-0.8, k=0.1-0.25. Collaborator's site-specific model (PPTX Slides 19-23). All 4 share the same param_ranges (full general range) with different theta_true at the corners."
+  },
+  "global_defaults": {
+    "location": "mt_st_helens",
+    "year": "2009",
+    "fixed_mwr_tag": "2_FIXED_MWR_PARAMS",
+    "n_ensemble": 15,
+    "perturbation_seed": 42,
+    "deep_seated": true
+  },
+  "scenarios": [
+    {
+      "climate_class": "dry",
+      "theta_group": "dryer_soil1",
+      "description": "Dry climate, dryer end, low soil availability",
+      "theta_base": {
+        "S_c": 0.275,
+        "q_c": 0.6375,
+        "k": 0.0125,
+        "soil_depth": 1.4375,
+        "depth_parameter": 1.5
+      },
+      "theta_true": {
+        "S_c": 0.3,
+        "q_c": 0.8,
+        "k": 0.01,
+        "soil_depth": 1.25,
+        "depth_parameter": 1.25
+      },
+      "param_ranges": {
+        "S_c": [
+          0.25,
+          0.3
+        ],
+        "q_c": [
+          0.475,
+          0.8
+        ],
+        "k": [
+          0.01,
+          0.015
+        ],
+        "soil_depth": [
+          1.25,
+          1.625
+        ],
+        "depth_parameter": [
+          1.25,
+          1.75
+        ]
+      }
+    },
+    {
+      "climate_class": "dry",
+      "theta_group": "dryer_soil2",
+      "description": "Dry climate, dryer end, high soil availability",
+      "theta_base": {
+        "S_c": 0.275,
+        "q_c": 0.6375,
+        "k": 0.0125,
+        "soil_depth": 1.8125,
+        "depth_parameter": 2.375
+      },
+      "theta_true": {
+        "S_c": 0.3,
+        "q_c": 0.8,
+        "k": 0.01,
+        "soil_depth": 2.0,
+        "depth_parameter": 3.0
+      },
+      "param_ranges": {
+        "S_c": [
+          0.25,
+          0.3
+        ],
+        "q_c": [
+          0.475,
+          0.8
+        ],
+        "k": [
+          0.01,
+          0.015
+        ],
+        "soil_depth": [
+          1.625,
+          2.0
+        ],
+        "depth_parameter": [
+          1.75,
+          3.0
+        ]
+      }
+    },
+    {
+      "climate_class": "dry",
+      "theta_group": "wetter_soil1",
+      "description": "Dry climate, wetter end, low soil availability",
+      "theta_base": {
+        "S_c": 0.225,
+        "q_c": 0.3125,
+        "k": 0.0175,
+        "soil_depth": 1.4375,
+        "depth_parameter": 1.5
+      },
+      "theta_true": {
+        "S_c": 0.2,
+        "q_c": 0.15,
+        "k": 0.02,
+        "soil_depth": 1.25,
+        "depth_parameter": 1.25
+      },
+      "param_ranges": {
+        "S_c": [
+          0.2,
+          0.25
+        ],
+        "q_c": [
+          0.15,
+          0.475
+        ],
+        "k": [
+          0.015,
+          0.02
+        ],
+        "soil_depth": [
+          1.25,
+          1.625
+        ],
+        "depth_parameter": [
+          1.25,
+          1.75
+        ]
+      }
+    },
+    {
+      "climate_class": "dry",
+      "theta_group": "wetter_soil2",
+      "description": "Dry climate, wetter end, high soil availability",
+      "theta_base": {
+        "S_c": 0.225,
+        "q_c": 0.3125,
+        "k": 0.0175,
+        "soil_depth": 1.8125,
+        "depth_parameter": 2.375
+      },
+      "theta_true": {
+        "S_c": 0.2,
+        "q_c": 0.15,
+        "k": 0.02,
+        "soil_depth": 2.0,
+        "depth_parameter": 3.0
+      },
+      "param_ranges": {
+        "S_c": [
+          0.2,
+          0.25
+        ],
+        "q_c": [
+          0.15,
+          0.475
+        ],
+        "k": [
+          0.015,
+          0.02
+        ],
+        "soil_depth": [
+          1.625,
+          2.0
+        ],
+        "depth_parameter": [
+          1.75,
+          3.0
+        ]
+      }
+    },
+    {
+      "climate_class": "moderate",
+      "theta_group": "dryer_soil1",
+      "description": "Moderate climate, dryer end, low soil availability",
+      "theta_base": {
+        "S_c": 0.1675,
+        "q_c": 0.1175,
+        "k": 0.04075,
+        "soil_depth": 1.4375,
+        "depth_parameter": 1.5
+      },
+      "theta_true": {
+        "S_c": 0.19,
+        "q_c": 0.14,
+        "k": 0.021,
+        "soil_depth": 1.25,
+        "depth_parameter": 1.25
+      },
+      "param_ranges": {
+        "S_c": [
+          0.145,
+          0.19
+        ],
+        "q_c": [
+          0.095,
+          0.14
+        ],
+        "k": [
+          0.021,
+          0.0605
+        ],
+        "soil_depth": [
+          1.25,
+          1.625
+        ],
+        "depth_parameter": [
+          1.25,
+          1.75
+        ]
+      }
+    },
+    {
+      "climate_class": "moderate",
+      "theta_group": "dryer_soil2",
+      "description": "Moderate climate, dryer end, high soil availability",
+      "theta_base": {
+        "S_c": 0.1675,
+        "q_c": 0.1175,
+        "k": 0.04075,
+        "soil_depth": 1.8125,
+        "depth_parameter": 2.375
+      },
+      "theta_true": {
+        "S_c": 0.19,
+        "q_c": 0.14,
+        "k": 0.021,
+        "soil_depth": 2.0,
+        "depth_parameter": 3.0
+      },
+      "param_ranges": {
+        "S_c": [
+          0.145,
+          0.19
+        ],
+        "q_c": [
+          0.095,
+          0.14
+        ],
+        "k": [
+          0.021,
+          0.0605
+        ],
+        "soil_depth": [
+          1.625,
+          2.0
+        ],
+        "depth_parameter": [
+          1.75,
+          3.0
+        ]
+      }
+    },
+    {
+      "climate_class": "moderate",
+      "theta_group": "wetter_soil1",
+      "description": "Moderate climate, wetter end, low soil availability",
+      "theta_base": {
+        "S_c": 0.1225,
+        "q_c": 0.0725,
+        "k": 0.08025,
+        "soil_depth": 1.4375,
+        "depth_parameter": 1.5
+      },
+      "theta_true": {
+        "S_c": 0.1,
+        "q_c": 0.05,
+        "k": 0.1,
+        "soil_depth": 1.25,
+        "depth_parameter": 1.25
+      },
+      "param_ranges": {
+        "S_c": [
+          0.1,
+          0.145
+        ],
+        "q_c": [
+          0.05,
+          0.095
+        ],
+        "k": [
+          0.0605,
+          0.1
+        ],
+        "soil_depth": [
+          1.25,
+          1.625
+        ],
+        "depth_parameter": [
+          1.25,
+          1.75
+        ]
+      }
+    },
+    {
+      "climate_class": "moderate",
+      "theta_group": "wetter_soil2",
+      "description": "Moderate climate, wetter end, high soil availability",
+      "theta_base": {
+        "S_c": 0.1225,
+        "q_c": 0.0725,
+        "k": 0.08025,
+        "soil_depth": 1.8125,
+        "depth_parameter": 2.375
+      },
+      "theta_true": {
+        "S_c": 0.1,
+        "q_c": 0.05,
+        "k": 0.1,
+        "soil_depth": 2.0,
+        "depth_parameter": 3.0
+      },
+      "param_ranges": {
+        "S_c": [
+          0.1,
+          0.145
+        ],
+        "q_c": [
+          0.05,
+          0.095
+        ],
+        "k": [
+          0.0605,
+          0.1
+        ],
+        "soil_depth": [
+          1.625,
+          2.0
+        ],
+        "depth_parameter": [
+          1.75,
+          3.0
+        ]
+      }
+    },
+    {
+      "climate_class": "wet",
+      "theta_group": "dryer_soil1",
+      "description": "Wet climate, dryer end, low soil availability",
+      "theta_base": {
+        "S_c": 0.08,
+        "q_c": 0.0325,
+        "k": 0.145,
+        "soil_depth": 1.4375,
+        "depth_parameter": 1.5
+      },
+      "theta_true": {
+        "S_c": 0.09,
+        "q_c": 0.04,
+        "k": 0.11,
+        "soil_depth": 1.25,
+        "depth_parameter": 1.25
+      },
+      "param_ranges": {
+        "S_c": [
+          0.07,
+          0.09
+        ],
+        "q_c": [
+          0.025,
+          0.04
+        ],
+        "k": [
+          0.11,
+          0.18
+        ],
+        "soil_depth": [
+          1.25,
+          1.625
+        ],
+        "depth_parameter": [
+          1.25,
+          1.75
+        ]
+      }
+    },
+    {
+      "climate_class": "wet",
+      "theta_group": "dryer_soil2",
+      "description": "Wet climate, dryer end, high soil availability",
+      "theta_base": {
+        "S_c": 0.08,
+        "q_c": 0.0325,
+        "k": 0.145,
+        "soil_depth": 1.8125,
+        "depth_parameter": 2.375
+      },
+      "theta_true": {
+        "S_c": 0.09,
+        "q_c": 0.04,
+        "k": 0.11,
+        "soil_depth": 2.0,
+        "depth_parameter": 3.0
+      },
+      "param_ranges": {
+        "S_c": [
+          0.07,
+          0.09
+        ],
+        "q_c": [
+          0.025,
+          0.04
+        ],
+        "k": [
+          0.11,
+          0.18
+        ],
+        "soil_depth": [
+          1.625,
+          2.0
+        ],
+        "depth_parameter": [
+          1.75,
+          3.0
+        ]
+      }
+    },
+    {
+      "climate_class": "wet",
+      "theta_group": "wetter_soil1",
+      "description": "Wet climate, wetter end, low soil availability",
+      "theta_base": {
+        "S_c": 0.06,
+        "q_c": 0.0175,
+        "k": 0.215,
+        "soil_depth": 1.4375,
+        "depth_parameter": 1.5
+      },
+      "theta_true": {
+        "S_c": 0.05,
+        "q_c": 0.02,
+        "k": 0.25,
+        "soil_depth": 1.25,
+        "depth_parameter": 1.25
+      },
+      "param_ranges": {
+        "S_c": [
+          0.05,
+          0.07
+        ],
+        "q_c": [
+          0.01,
+          0.025
+        ],
+        "k": [
+          0.18,
+          0.25
+        ],
+        "soil_depth": [
+          1.25,
+          1.625
+        ],
+        "depth_parameter": [
+          1.25,
+          1.75
+        ]
+      }
+    },
+    {
+      "climate_class": "wet",
+      "theta_group": "wetter_soil2",
+      "description": "Wet climate, wetter end, high soil availability",
+      "theta_base": {
+        "S_c": 0.06,
+        "q_c": 0.0175,
+        "k": 0.215,
+        "soil_depth": 1.8125,
+        "depth_parameter": 2.375
+      },
+      "theta_true": {
+        "S_c": 0.05,
+        "q_c": 0.02,
+        "k": 0.25,
+        "soil_depth": 2.0,
+        "depth_parameter": 3.0
+      },
+      "param_ranges": {
+        "S_c": [
+          0.05,
+          0.07
+        ],
+        "q_c": [
+          0.01,
+          0.025
+        ],
+        "k": [
+          0.18,
+          0.25
+        ],
+        "soil_depth": [
+          1.625,
+          2.0
+        ],
+        "depth_parameter": [
+          1.75,
+          3.0
+        ]
+      }
+    },
+    {
+      "climate_class": "general",
+      "theta_group": "high_Sc_low_k",
+      "description": "General site model: high S_c, low k, mid q_c (PPTX Slide 20)",
+      "theta_base": {
+        "S_c": 0.125,
+        "q_c": 0.425,
+        "k": 0.175,
+        "soil_depth": 1.625,
+        "depth_parameter": 2.125
+      },
+      "theta_true": {
+        "S_c": 0.15,
+        "q_c": 0.5,
+        "k": 0.1,
+        "soil_depth": 2.0,
+        "depth_parameter": 3.0
+      },
+      "param_ranges": {
+        "S_c": [
+          0.1,
+          0.15
+        ],
+        "q_c": [
+          0.05,
+          0.8
+        ],
+        "k": [
+          0.1,
+          0.25
+        ],
+        "soil_depth": [
+          1.25,
+          2.0
+        ],
+        "depth_parameter": [
+          1.25,
+          3.0
+        ]
+      }
+    },
+    {
+      "climate_class": "general",
+      "theta_group": "high_Sc_high_k_mid_qc",
+      "description": "General site model: high S_c, high k, mid q_c (PPTX Slide 21)",
+      "theta_base": {
+        "S_c": 0.125,
+        "q_c": 0.425,
+        "k": 0.175,
+        "soil_depth": 1.625,
+        "depth_parameter": 2.125
+      },
+      "theta_true": {
+        "S_c": 0.15,
+        "q_c": 0.5,
+        "k": 0.25,
+        "soil_depth": 2.0,
+        "depth_parameter": 3.0
+      },
+      "param_ranges": {
+        "S_c": [
+          0.1,
+          0.15
+        ],
+        "q_c": [
+          0.05,
+          0.8
+        ],
+        "k": [
+          0.1,
+          0.25
+        ],
+        "soil_depth": [
+          1.25,
+          2.0
+        ],
+        "depth_parameter": [
+          1.25,
+          3.0
+        ]
+      }
+    },
+    {
+      "climate_class": "general",
+      "theta_group": "low_Sc_low_k",
+      "description": "General site model: low S_c, low k, mid q_c (PPTX Slide 22)",
+      "theta_base": {
+        "S_c": 0.125,
+        "q_c": 0.425,
+        "k": 0.175,
+        "soil_depth": 1.625,
+        "depth_parameter": 2.125
+      },
+      "theta_true": {
+        "S_c": 0.1,
+        "q_c": 0.5,
+        "k": 0.1,
+        "soil_depth": 2.0,
+        "depth_parameter": 3.0
+      },
+      "param_ranges": {
+        "S_c": [
+          0.1,
+          0.15
+        ],
+        "q_c": [
+          0.05,
+          0.8
+        ],
+        "k": [
+          0.1,
+          0.25
+        ],
+        "soil_depth": [
+          1.25,
+          2.0
+        ],
+        "depth_parameter": [
+          1.25,
+          3.0
+        ]
+      }
+    },
+    {
+      "climate_class": "general",
+      "theta_group": "high_Sc_high_k_high_qc",
+      "description": "General site model: high S_c, high k, high q_c (PPTX Slide 23)",
+      "theta_base": {
+        "S_c": 0.125,
+        "q_c": 0.425,
+        "k": 0.175,
+        "soil_depth": 1.625,
+        "depth_parameter": 2.125
+      },
+      "theta_true": {
+        "S_c": 0.15,
+        "q_c": 0.8,
+        "k": 0.25,
+        "soil_depth": 2.0,
+        "depth_parameter": 3.0
+      },
+      "param_ranges": {
+        "S_c": [
+          0.1,
+          0.15
+        ],
+        "q_c": [
+          0.05,
+          0.8
+        ],
+        "k": [
+          0.1,
+          0.25
+        ],
+        "soil_depth": [
+          1.25,
+          2.0
+        ],
+        "depth_parameter": [
+          1.25,
+          3.0
+        ]
+      }
+    }
+  ]
+}
