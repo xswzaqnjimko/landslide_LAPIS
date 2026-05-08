@@ -5,11 +5,9 @@
     "climate_classes": "dry / moderate / wet \u2014 controls ranges of S_c, q_c, k",
     "moisture_subclass": "dryer = upper half of S_c & q_c, lower half of k; wetter = lower half of S_c & q_c, upper half of k. Split at midpoint of each climate class range.",
     "soil_levels": "soil1 = lower half of soil range; soil2 = upper half of soil range",
-    "param_ranges_source": "Model_outputs_2.pptx from collaborator (Feb 2026), with dryer/wetter split at midpoint to prevent ensemble members from sampling extreme-opposite parameters",
     "n_ensemble": 15,
     "deep_seated": true,
-    "theta_true_source": "Collaborator's PPTX example values for each dryer/wetter endpoint (verified within sub-ranges)",
-    "general_model": "S_c=0.1-0.15, q_c=0.05-0.8, k=0.1-0.25. Collaborator's site-specific model (PPTX Slides 19-23). All 4 share the same param_ranges (full general range) with different theta_true at the corners."
+    "general_model": "S_c=0.1-0.15, q_c=0.05-0.8, k=0.1-0.25. All 4 share the same param_ranges (full general range) with different theta_true at the corners."
   },
   "global_defaults": {
     "location": "mt_st_helens",
