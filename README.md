@@ -1,8 +1,6 @@
 # LAPIS-SHRED Landslide
 
-Spatiotemporal landslide runout reconstruction from sparse observations using [LAPIS-SHRED](https://github.com/xswzaqnjimko/LAPIS-SHRED).
-
-**Paper:** *Spatiotemporal Landslide Reconstruction from Sparse Observations with LAPIS-SHRED* (Zhang, Bao & Kutz, 2026)
+**Paper:** *Spatiotemporal Landslide Runout Reconstruction from Sparse Observations with LAPIS-SHRED* (Zhang et al., 2026)
 
 ## Overview
 
