@@ -1,6 +1,6 @@
 {
   "_description": "LAPIS scenario parameter file for Cascade Mountains 2009 event. 12 scenarios: 3 climate classes \u00d7 2 moisture sub-classes \u00d7 2 soil availability levels. Dryer/wetter sub-classes have SPLIT parameter ranges (each gets half of the climate class range) to prevent cross-contamination. Plus 4 general site model scenarios.",
-  "_usage": "python data_generation_scenarios.py --scenario_file scenarios_2009_split.json",
+  "_usage": "python data_generation_scenarios.py --scenario_file scenarios_2009_split_16.json",
   "_notes": {
     "climate_classes": "dry / moderate / wet \u2014 controls ranges of S_c, q_c, k",
     "moisture_subclass": "dryer = upper half of S_c & q_c, lower half of k; wetter = lower half of S_c & q_c, upper half of k. Split at midpoint of each climate class range.",
@@ -513,7 +513,7 @@
     {
       "climate_class": "general",
       "theta_group": "high_Sc_low_k",
-      "description": "General site model: high S_c, low k, mid q_c (PPTX Slide 20)",
+      "description": "General site model: high S_c, low k, mid q_c",
       "theta_base": {
         "S_c": 0.125,
         "q_c": 0.425,
@@ -554,7 +554,7 @@
     {
       "climate_class": "general",
       "theta_group": "high_Sc_high_k_mid_qc",
-      "description": "General site model: high S_c, high k, mid q_c (PPTX Slide 21)",
+      "description": "General site model: high S_c, high k, mid q_c",
       "theta_base": {
         "S_c": 0.125,
         "q_c": 0.425,
@@ -595,7 +595,7 @@
     {
       "climate_class": "general",
       "theta_group": "low_Sc_low_k",
-      "description": "General site model: low S_c, low k, mid q_c (PPTX Slide 22)",
+      "description": "General site model: low S_c, low k, mid q_c",
       "theta_base": {
         "S_c": 0.125,
         "q_c": 0.425,
@@ -636,7 +636,7 @@
     {
       "climate_class": "general",
       "theta_group": "high_Sc_high_k_high_qc",
-      "description": "General site model: high S_c, high k, high q_c (PPTX Slide 23)",
+      "description": "General site model: high S_c, high k, high q_c",
       "theta_base": {
         "S_c": 0.125,
         "q_c": 0.425,

@@ -1,32 +1,9 @@
 #!/usr/bin/env python3
 """
-LAPIS Data Generation Pipeline — Scenario-Based
+MWR Landslide LAPIS-SHRED Data Generation Pipeline — Scenario-Based
 =================================================
 
 Generates MWR simulation ensembles for LAPIS training and evaluation.
-
-The MWR workflow in this script mirrors the collaborator's reference
-notebook (landslide_runout_animation_Cascades2009_UPDATED.ipynb) exactly:
-
-  1.  Load DEM via  esri_ascii.load()
-  2.  Load landslide polygon via  esri_ascii.load(..., out=mg)
-  3.  Set  soil__thickness  (uniform baseline, then deep-seated gradient)
-  4.  mg.set_watershed_boundary_condition(z)
-  5.  Set  particle__diameter
-  6.  FlowAccumulator D8  ->  run_one_step()
-  7.  DepressionFinderAndRouter  ->  map_depressions()
-  8.  Save  topographic__initial_elevation  =  copy of z   <- AFTER step 7
-  9.  Delete D8 fields
-  10. FlowDirectorMFD  ->  run_one_step()
-  11. MassWastingRunout  ->  run_one_step()
-  12. DoD  =  evo_maps[frame]  -  topographic__initial_elevation
-
-Each .npy file stores a DoD frame (not raw elevation), exactly as the
-collaborator computes it:  evo_maps[i] - initial_elevation.
-
-Since initial_elevation == evo_maps[0] (confirmed by debug), the downstream
-evolution_to_dod() in lapis_landslide.py (which does frames - frame[0])
-produces  DoD[i] - DoD[0] = DoD[i] - 0 = DoD[i] -- the same values.
 
 Directory layout produced:
   data/<location>/<year>/<fixed_mwr_tag>/<climate_class>/<theta_group>/
@@ -54,14 +31,12 @@ from typing import Dict, List, Tuple, Optional
 import numpy as np
 
 
-# =============================================================================
-# RUN CONFIGURATION  -- edit this section, then right-click -> Run in PyCharm
-# =============================================================================
+# RUN CONFIGURATION
 
 class RunConfig:
     MODE = "batch"
     SCENARIO_FILE = "scenarios_2009_split_16.json"
-    ONLY = ["wet/dryer_soil2"] # None
+    ONLY = ["dry/dryer_soil1"] # None
 
     LOCATION       = "mt_st_helens"
     YEAR           = "2009"
@@ -77,14 +52,12 @@ class RunConfig:
     FORCE = True # False
 
 
-# =============================================================================
 # PROJECT LAYOUT
-# =============================================================================
 
 class ProjectPaths:
     ROOT = Path(__file__).resolve().parent
 
-    CODE   = ROOT / "code"
+    CODE   = ROOT
     DATA   = ROOT / "data"
     RESULT = ROOT / "results"
 
@@ -105,20 +78,18 @@ class ProjectPaths:
         return cls.RESULT / location / year / fixed_mwr_tag / climate_class / theta_group
 
 
-# =============================================================================
 # FIXED MWR PARAMETER SETS
-# =============================================================================
 
 FIXED_MWR_PARAM_SETS = {
     "1_FIXED_MWR_PARAMS": {
-        "description": "Original set (2021 event / LAPIS paper draft)",
+        "description": "2021 event",
         "typical_flow_thickness_of_erosion_zone": 2,
         "typical_slope_of_erosion_zone": 0.25,
         "max_flow_depth_observed_in_field": 5,
         "Dp": 0.316,
     },
     "2_FIXED_MWR_PARAMS": {
-        "description": "Updated set (2009 Cascade Mts, from collaborator Feb 2026)",
+        "description": "2009 event",
         "typical_flow_thickness_of_erosion_zone": 4,
         "typical_slope_of_erosion_zone": 0.25,
         "max_flow_depth_observed_in_field": 6,
@@ -127,9 +98,8 @@ FIXED_MWR_PARAM_SETS = {
 }
 
 
-# =============================================================================
 # TOPOLOGY FILE MAPPING
-# =============================================================================
+# Input grids are ESRI ASCII files for the Landlab MassWastingRunout (MWR) model (https://github.com/landlab/landlab).
 
 TOPO_FILE_MAP = {
     "dem.asc": [
@@ -158,9 +128,7 @@ TOPO_FILE_MAP = {
 }
 
 
-# =============================================================================
 # UTILITY FUNCTIONS
-# =============================================================================
 
 def load_esri_ascii_meta(filepath: Path) -> dict:
     """Load only the header metadata from an ESRI ASCII grid file."""
@@ -181,9 +149,7 @@ def load_esri_ascii_meta(filepath: Path) -> dict:
     return meta
 
 
-# =============================================================================
 # PERTURBATION
-# =============================================================================
 
 THETA_PARAMS = ["S_c", "q_c", "k", "soil_depth", "depth_parameter"]
 
@@ -196,11 +162,6 @@ def generate_perturbed_thetas(theta_base: Dict[str, float],
                               ) -> List[Dict[str, float]]:
     """
     Generate *n* perturbed parameter dicts.
-
-    If *param_ranges* is provided (dict mapping param name -> [min, max]),
-    each parameter is sampled uniformly within its specified range.
-
-    Otherwise falls back to the legacy +/-perturbation_range mode.
     """
     rng = np.random.RandomState(seed)
     result = []
@@ -218,32 +179,8 @@ def generate_perturbed_thetas(theta_base: Dict[str, float],
     return result
 
 
-# =============================================================================
 # MWR SIMULATION
-# =============================================================================
-# Step-by-step correspondence with the collaborator's notebook:
-#
-#   Notebook Cell 11        ->  Our code
-#   ---------------------   -----------------------------------------
-#   esri_ascii.load(DEM)    ->  esri_ascii.load(dem.asc)
-#   esri_ascii.load(poly)   ->  esri_ascii.load(landslide_polygon.asc)
-#   depth = ones * soil_d   ->  soil__thickness = ones * soil_depth
-#   deep_seated gradient     ->  dp + (9/200)*yd
-#   set_watershed_bc(z)     ->  set_watershed_boundary_condition(z)
-#   particle__diameter       ->  particle__diameter
-#   FlowAccumulator D8      ->  FlowAccumulator D8
-#   DepressionFinder         ->  DepressionFinderAndRouter
-#   initial_elev = copy(z)  ->  initial_elev = copy(z)     <- AFTER depr. fill
-#
-#   Notebook Cell 25        ->  Our code
-#   ---------------------   -----------------------------------------
-#   delete D8 fields         ->  delete D8 fields
-#   FlowDirectorMFD          ->  FlowDirectorMFD
-#   MWR(...).run_one_step() ->  MWR(...).run_one_step()
-#
-#   Notebook Cell 27        ->  Our code
-#   ---------------------   -----------------------------------------
-#   dem_dif_m = evo[i]-init ->  dod = evo[i] - init_elev   <- saved as .npy
+# Following the Landlab MWR notebook.
 
 def run_mwr_simulation(theta: Dict[str, float],
                        topology_dir: Path,
@@ -251,14 +188,7 @@ def run_mwr_simulation(theta: Dict[str, float],
                        fixed_params: Dict,
                        deep_seated: bool = True) -> Dict[int, np.ndarray]:
     """
-    Run a single MWR simulation, mirroring the collaborator's notebook.
-
-    Each saved .npy file contains a DoD frame:
-        DoD[i] = evo_maps[i] - topographic__initial_elevation
-    exactly as the collaborator computes dem_dif_m in Cell 27.
-
-    Returns dict mapping iteration index -> 2-D DoD array (H, W) in
-    geographic image order (row 0 = north).
+    Run a single MWR simulation.
     """
     print(f"    Running MWR: S_c={theta['S_c']:.4f}, q_c={theta['q_c']:.4f}, "
           f"k={theta['k']:.5f}, soil={theta['soil_depth']:.2f}, "
@@ -273,11 +203,8 @@ def run_mwr_simulation(theta: Dict[str, float],
         print(f"ERROR: Landlab not available: {e}")
         sys.exit(1)
 
-    # ================================================================
-    # GRID SETUP  --  matches notebook Cell 11
-    # ================================================================
+    # GRID SETUP
 
-    # ---- 1. Load DEM ----
     dem_path = topology_dir / "dem.asc"
     with open(dem_path) as fp:
         mg = esri_ascii.load(fp, name="topographic__elevation", at="node")
@@ -286,20 +213,15 @@ def run_mwr_simulation(theta: Dict[str, float],
     nr = mg.number_of_node_rows
     nc = mg.number_of_node_columns
 
-    # ---- 2. Load landslide polygon ----
     poly_path = topology_dir / "landslide_polygon.asc"
     with open(poly_path) as fp:
         esri_ascii.load(fp, name="mass__wasting_id", at="node", out=mg)
     mg.at_node["mass__wasting_id"] = mg.at_node["mass__wasting_id"].astype(int)
 
-    # ---- 3. Soil thickness ----
-    # Notebook: depth = np.ones(mg.number_of_nodes) * soil_depth
     soil_depth_val = theta['soil_depth']
     mg.add_field("soil__thickness",
                  np.ones(mg.number_of_nodes) * soil_depth_val, at="node")
 
-    # ---- 4. Deep-seated soil gradient ----
-    # Notebook: lsd = Depth_parameter + (9/200) * yd
     if deep_seated:
         mw_id = 1
         ls_mask = mg.at_node['mass__wasting_id'] == mw_id
@@ -324,48 +246,32 @@ def run_mwr_simulation(theta: Dict[str, float],
             ls_mask = mg.at_node['mass__wasting_id'] == 1
             mg.at_node['soil__thickness'][ls_mask] = ld[ls_mask]
 
-    # ---- 5. Boundary conditions ----
-    # Notebook: mg.set_watershed_boundary_condition(z)
     mg.set_watershed_boundary_condition(z)
 
-    # ---- 6. Particle diameter ----
-    # Notebook: mg.at_node["particle__diameter"] = np.ones(len(mg.node_x)) * Dp
     mg.at_node["particle__diameter"] = (
         np.ones(mg.number_of_nodes) * fixed_params['Dp'])
 
-    # ---- 7. D8 flow accumulation ----
-    # Notebook: fa = FlowAccumulator(mg, ..., flow_director="FlowDirectorD8")
     fa = FlowAccumulator(mg, "topographic__elevation",
                          flow_director="FlowDirectorD8")
     fa.run_one_step()
 
-    # ---- 8. Depression filling ----
-    # Notebook: df_4 = DepressionFinderAndRouter(mg); df_4.map_depressions()
     df = DepressionFinderAndRouter(mg)
     df.map_depressions()
 
-    # ---- 9. Save initial elevation  <- AFTER depression filling ----
-    # Notebook: mg.add_field("topographic__initial_elevation",
-    #               mg.at_node["topographic__elevation"], at="node", copy=True)
     mg.add_field("topographic__initial_elevation",
                  mg.at_node["topographic__elevation"].copy(),
                  at="node", clobber=True)
 
-    # ================================================================
-    # FLOW ROUTING  --  matches notebook Cell 25
-    # ================================================================
+    # FLOW ROUTING
 
-    # ---- 10. Delete D8 fields ----
     for f in ['flow__sink_flag', 'flow__link_to_receiver_node',
               'flow__receiver_node', 'topographic__steepest_slope']:
         if f in mg.at_node:
             mg.delete_field(loc="node", name=f)
 
-    # ---- 11. Multi-flow direction ----
     fd = FlowDirectorMFD(mg, diagonals=True, partition_method="slope")
     fd.run_one_step()
 
-    # ---- 12. Run MWR ----
     mwr = MassWastingRunout(
         grid=mg,
         critical_slope=theta['S_c'],
@@ -382,20 +288,12 @@ def run_mwr_simulation(theta: Dict[str, float],
     )
     mwr.run_one_step()
 
-    # ================================================================
-    # EXTRACT DoD AND SAVE  --  matches notebook Cell 27
-    # ================================================================
-    # Notebook:  dem_dif_m = evo_maps[0][frame] - initial_elevation
-    #
-    # We compute this for every frame and save as .npy.
-    # NODATA nodes (closed boundaries) have unchanged elevation,
-    # so their DoD is exactly 0 -- no contamination.
+    # EXTRACT DoD AND SAVE
 
     init_elev = mg.at_node["topographic__initial_elevation"]
 
     dod_evolution = {}
     for i, evo_flat in mwr.saver.runout_evo_maps[0].items():
-        # Collaborator's DoD: evo_maps[frame] - initial_elevation
         dod_flat = evo_flat - init_elev
 
         # Reshape from Landlab 1-D (bottom-to-top rows) to 2-D grid
@@ -409,7 +307,7 @@ def run_mwr_simulation(theta: Dict[str, float],
     for i, dod_frame in dod_evolution.items():
         np.save(output_dir / f"iter_{i:04d}.npy", dod_frame)
 
-    # ---- Print final-frame stats (matching notebook Cell 28) ----
+    # ---- Print final-frame stats ----
     iter_keys = sorted(dod_evolution.keys())
     final_dod_2d = dod_evolution[iter_keys[-1]]
     final_dod_flat = final_dod_2d.ravel()
@@ -445,9 +343,7 @@ def load_cached_simulation(cache_dir: Path) -> Optional[Dict[int, np.ndarray]]:
             for f in sorted(cache_dir.glob("iter_*.npy"))}
 
 
-# =============================================================================
 # TOPOLOGY SETUP
-# =============================================================================
 
 def setup_topology(topo_dest: Path, topo_source: Path) -> bool:
     """Copy canonical topology files from original data."""
@@ -476,9 +372,7 @@ def setup_topology(topo_dest: Path, topo_source: Path) -> bool:
     return all_ok
 
 
-# =============================================================================
 # SINGLE-SCENARIO PIPELINE
-# =============================================================================
 
 def run_scenario(location: str, year: str, fixed_mwr_tag: str,
                  climate_class: str, theta_group: str,
@@ -641,9 +535,7 @@ def _simulations_complete(sim_dir: Path, n_ensemble: int) -> bool:
     return True
 
 
-# =============================================================================
 # BATCH MODE
-# =============================================================================
 
 def run_from_scenario_file(scenario_file: Path, force: bool = False,
                            scenarios_filter: Optional[List[str]] = None):
@@ -699,9 +591,7 @@ def run_from_scenario_file(scenario_file: Path, force: bool = False,
     print(f"\n  {n_ok}/{len(results)} scenarios completed successfully")
 
 
-# =============================================================================
 # LIST MODE
-# =============================================================================
 
 def list_existing():
     data = ProjectPaths.DATA
@@ -748,9 +638,7 @@ def list_existing():
                               f"{rel}  {desc}")
 
 
-# =============================================================================
 # CLI
-# =============================================================================
 
 def main():
     parser = argparse.ArgumentParser(
@@ -770,9 +658,6 @@ Examples:
 
   # List existing
   python data_generation_scenarios.py --list
-
-Note: When run without any CLI arguments, the script uses RunConfig at the
-top of the file.  Edit RunConfig for PyCharm right-click -> Run workflow.
 """
     )
 
